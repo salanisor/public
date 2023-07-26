@@ -50,9 +50,9 @@ spec:
   resources:
     requests:
       storage: 5Gi
-    selector: 
-      matchLabels: 
-        ftmvolume: 001
+  selector: 
+    matchLabels: 
+      ftmvolume: 001
 ~~~
 
 Step 4) As the final step, we'll now mount the NFS export to our pods via a `Deployment` using the `volumes` and `volumeMounts` directives using the `persistentVolumeClaim` name, given during step 3).
