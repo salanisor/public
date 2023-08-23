@@ -1,6 +1,6 @@
 #### How to install the nmstate operator on OpenShift via GitOps
 
-##### Links
+#### Links
 
 - handling graceful installation of operator subscriptions: https://piotrminkowski.com/2023/05/05/manage-kubernetes-operators-with-argocd/
 
