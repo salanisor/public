@@ -17,5 +17,5 @@ spec:
             operator: In
             values:
               - ''
-  storageClassName: local-block
-  volumeMode: Block
+  storageClassName: local-filesystem
+  volumeMode: Filesystem
