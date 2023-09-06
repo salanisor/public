@@ -5,7 +5,7 @@ metadata:
   namespace: openshift-migration
 spec:
   azure_resource_group: ''
-  cluster_name: host
+  cluster_name: <enter_destination_cluster_subdomain>
   migration_velero: true
   migration_controller: true
   migration_ui: true
