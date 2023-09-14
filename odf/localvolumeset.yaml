@@ -10,6 +10,13 @@ spec:
     deviceTypes:
       - disk
     minSize: 1Gi
+  tolerations:
+  - key: "infra"
+    value: "reserved"
+    effect: NoExecute
+  - key: "infra"
+    value: "reserved"
+    effect: NoSchedule
   nodeSelector:
     nodeSelectorTerms:
       - matchExpressions:
