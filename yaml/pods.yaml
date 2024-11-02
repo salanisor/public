@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-volume
+spec:
+  containers:
+  - name: backup-volume-pod
+    image: quay.io/ansible/awx:24.4.0
+    command: ["/bin/sleep"]
+    args: ["infinity"] 
