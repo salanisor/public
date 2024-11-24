@@ -64,4 +64,4 @@ patches:
           scopes: "[accounts,groups]"
       - op: add
         path: /spec/server/host
-        value: "argocd-server-gitops.example.com"
+        value: "openshift-gitops-server-gitops.apps.ocp4.example.com"
