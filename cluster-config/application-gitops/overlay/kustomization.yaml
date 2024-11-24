@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- git@github.com:salanisor/public.git/cluster-config/components/infra/openshift-gitops-remote/base?ref=main
+
+patches:
+- patch: |-
+    - op: add
+      path: "/spec/rbac"
+      value:
+        defaultPolicy: role:readonly
+        policy: |
+          g, k8s-prod-admin, role:admin
+          g, system:cluster-admins, role:admin
+        scopes: "[groups]"
+  target:
+    group: argoproj.io
+    kind: ArgoCD
+    name: openshift-gitops
+    version: v1beta1

@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- argocd-configuration.yaml
+# - argocd-tls-certs-cm.yaml
+- sub-namespace.yaml
+- sub-operatorgroup.yaml
+- subscription.yaml
+- namespace.yaml
+- gitops-controller-rbac.yaml
+- gitops-server-rbac.yaml
+- cluster-admin-rolebinding.yaml
