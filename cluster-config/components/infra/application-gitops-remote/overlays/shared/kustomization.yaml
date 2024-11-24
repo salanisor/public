@@ -12,17 +12,17 @@ resources:
 
 patches:
   # Update permissions for tenants and local accounts, note ACCOUNT_NAMESPACES is space separated
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/env
-        value:
-          - name: ACCOUNTS_NAMESPACES
-            value: "product-catalog-pipeline=product-catalog-cicd rollouts-demo-pipeline=rollouts-demo-cicd"
-          - name: ARGO_SERVER_HOST
-            value: "argocd-server-gitops.example.com"
-    target:
-      kind: Job
-      name: create-pipeline-local-user
+  # - patch: |-
+  #     - op: replace
+  #       path: /spec/template/spec/containers/0/env
+  #       value:
+  #         - name: ACCOUNTS_NAMESPACES
+  #           value: "product-catalog-pipeline=product-catalog-cicd rollouts-demo-pipeline=rollouts-demo-cicd"
+  #         - name: ARGO_SERVER_HOST
+  #           value: "argocd-server-gitops.example.com"
+  #   target:
+  #     kind: Job
+  #     name: create-pipeline-local-user
   - target:
       kind: ArgoCD
       name: argocd
@@ -43,14 +43,9 @@ patches:
                     values:
                       - global
               projectName: global
-          accounts.product-catalog-pipeline: apiKey
-          accounts.rollouts-demo-pipeline: apiKey
-          oidc.config: |
-            name: Keycloak
-            issuer: https://sso.ocplab.com/realms/ocplab
-            clientID: argocd
-            clientSecret: $oidc.keycloak.clientSecret
-            requestedScopes: ["openid", "profile", "email", "groups"]
+          # accounts.product-catalog-pipeline: apiKey
+          # accounts.rollouts-demo-pipeline: apiKey
+          oidc.config: {}
       - op: add
         path: /spec/sourceNamespaces
         value:
