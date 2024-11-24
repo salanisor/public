@@ -45,7 +45,6 @@ patches:
               projectName: global
           # accounts.product-catalog-pipeline: apiKey
           # accounts.rollouts-demo-pipeline: apiKey
-          oidc.config: {}
       - op: add
         path: /spec/sourceNamespaces
         value:
