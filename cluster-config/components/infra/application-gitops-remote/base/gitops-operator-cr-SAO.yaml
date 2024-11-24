@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:
-  name: openshift-gitops
-  namespace: openshift-gitops
+  name: argocd
+  namespace: gitops
 spec:
   # using this in conjunction with respectRBAC
   # defaultClusterScopedRoleDisabled: true
