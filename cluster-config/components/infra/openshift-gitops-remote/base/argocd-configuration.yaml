@@ -315,8 +315,6 @@ spec:
         memory: 128Mi
   monitoring:
     enabled: false
-  notifications:
-    enabled: false
   prometheus:
     enabled: false
     ingress:

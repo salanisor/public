@@ -1,0 +1,526 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: openshift-gitops
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: openshift-gitops-operator
+---
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      gitops/aggregate-to-controller: "true"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  name: gitops-controller
+rules: []
+---
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-admin: "true"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    gitops/aggregate-to-controller: "true"
+  name: gitops-controller-admin
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    gitops/aggregate-to-controller: "true"
+  name: gitops-controller-view
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gitops-server
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - get
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - configmaps
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - argoproj.io
+  resources:
+  - applications
+  - appprojects
+  - applicationsets
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - delete
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-application-controller-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: openshift-gitops-argocd-application-controller
+  namespace: openshift-gitops
+---
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  applicationSet:
+    resources:
+      limits:
+        cpu: "2"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    webhookServer:
+      ingress:
+        enabled: false
+      route:
+        enabled: false
+  controller:
+    resources:
+      limits:
+        memory: 4Gi
+      requests:
+        cpu: 1000m
+        memory: 3Gi
+  grafana:
+    enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+    route:
+      enabled: false
+  ha:
+    enabled: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+  kustomizeBuildOptions: --enable-helm
+  monitoring:
+    enabled: false
+  notifications:
+    enabled: true
+  prometheus:
+    enabled: false
+    ingress:
+      enabled: false
+    route:
+      enabled: false
+  rbac:
+    defaultPolicy: role:none
+    policy: |
+      p, role:none, *, *, */*, deny
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: '[groups]'
+  redis:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+  repo:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  resourceActions:
+  - action: |
+      discovery.lua: |
+        local actions = {}
+        local enabled = false
+        if obj.status ~= nil and  obj.status.phase == "DONE" then
+          enabled = true
+        end
+        actions["rescan"] = {["disabled"] = not(enabled)}
+        return actions
+      definitions:
+      - name: rescan
+        action.lua: |
+          if obj.metadata.annotations == nil then
+              obj.metadata.annotations = {}
+          end
+          obj.metadata.annotations["compliance.openshift.io/rescan"] = ""
+          return obj
+    group: compliance.openshift.io
+    kind: ComplianceScan
+  resourceExclusions: |
+    - apiGroups:
+      - tekton.dev
+      clusters:
+      - '*'
+      kinds:
+      - TaskRun
+      - PipelineRun
+    - apiGroups:
+      - operator.tekton.dev
+      clusters:
+      - '*'
+      kinds:
+      - TektonAddon
+      - TektonInstallerSet
+    - apiGroups:
+      - compliance.openshift.io
+      kinds:
+      - ComplianceCheckResult
+      - ComplianceRemediation
+    - apiGroups:
+      - policy.open-cluster-management.io
+      kinds:
+      - ConfigurationPolicy
+    - apiGroups:
+      - noobaa.io
+      kinds:
+      - NooBaa
+      - BucketClass
+  resourceHealthChecks:
+  - check: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          hs.message = obj.status.health.message
+        end
+      end
+      return hs
+    group: argoproj.io
+    kind: Application
+  - check: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for _, condition in ipairs(obj.status.conditions) do
+            hs.message = condition.message
+            break
+          end
+        end
+        if obj.status.phase ~= nil then
+          if obj.status.phase == "Failure" then
+            hs.status = "Degraded"
+            return hs
+          elseif obj.status.phase == "Available" then
+            hs.status = "Healthy"
+            return hs
+          elseif obj.status.phase == "Pending" then
+            hs.status = "Progressing"
+            return hs
+          end
+        end
+        hs.status = "Progressing"
+        hs.message = "Waiting for operator to update status"
+        return hs
+      end
+    group: argoproj.io
+    kind: RolloutManager
+  - check: |
+      health_status = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          numDegraded = 0
+          numPending = 0
+          numSuspended = 0
+          msg = ""
+          for i, condition in pairs(obj.status.conditions) do
+            msg = msg .. i .. ": " .. condition.type .. " | " .. condition.status .. " | " .. condition.reason .. "\n"
+            if condition.type == "InstallPlanPending" and condition.status == "True" then
+              if condition.reason == "RequiresApproval" then
+                numSuspended = numSuspended + 1
+              else
+                numPending = numPending + 1
+              end
+            elseif (condition.type == "InstallPlanMissing" and condition.reason ~= "ReferencedInstallPlanNotFound") then
+              numDegraded = numDegraded + 1
+            elseif (condition.type == "CatalogSourcesUnhealthy" or condition.type == "InstallPlanFailed") and condition.status == "True" then
+              numDegraded = numDegraded + 1
+            elseif (condition.type == "ResolutionFailed" and condition.reason ~= "ConstraintsNotSatisfiable") then
+              numDegraded = numDegraded + 1
+            end
+          end
+          if numDegraded > 0 then
+            health_status.status = "Degraded"
+            health_status.message = msg
+            return health_status
+          elseif numSuspended > 0 then
+            health_status.status = "Suspended"
+            health_status.message = "Requires Approval"
+            return health_status
+          elseif numPending > 0 then
+            health_status.status = "Progressing"
+            health_status.message = "An install plan for a subscription is pending installation"
+            return health_status
+          else
+            health_status.status = "Healthy"
+            health_status.message = msg
+            return health_status
+          end
+        end
+      end
+      health_status.status = "Progressing"
+      health_status.message = "An install plan for a subscription is pending installation"
+      return health_status
+    group: operators.coreos.com
+    kind: Subscription
+  - check: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.phase ~= nil then
+          if obj.status.phase == "Complete" then
+            hs.status = "Healthy"
+            hs.message = obj.status.phase
+            return hs
+          elseif obj.status.phase == "RequiresApproval" then
+            hs.status = "Suspended"
+            hs.message = obj.status.phase
+            return hs
+          else
+            hs.status = "Progressing"
+            hs.message = obj.status.phase
+            return hs
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for InstallPlan to complete"
+      return hs
+    group: operators.coreos.com
+    kind: InstallPlan
+  - check: |
+      hs = {}
+      if obj.status ~= nil and obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.status == "True" or condition.reason == "InstallSuccessful" or condition.reason == "UpgradeSuccessful" then
+                hs.status = "Healthy"
+                hs.message = "Install Successful"
+                return hs
+            end
+          end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for Central to deploy."
+      return hs
+    group: platform.stackrox.io
+    kind: Central
+  - check: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.tags ~= nil then
+          numTags = 0
+          for _ , item in pairs(obj.status.tags) do
+            numTags = numTags + 1
+            numItems = 0
+            if item.tags ~= nil then
+              for _ , item in pairs(item.tags) do
+                numItems = numItems + 1
+              end
+              if numItems == 0 then
+                return hs
+              end
+            end
+          end
+          if numTags > 0 then
+            hs.status = "Healthy"
+            hs.message = "ImageStream has tags resolved"
+            return hs
+          end
+        end
+      end
+      return hs
+    group: image.openshift.io
+    kind: ImageStream
+  - check: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.phase ~= nil then
+          if obj.status.phase == "Complete" then
+            hs.status = "Healthy"
+            hs.message = obj.status.phase
+            return hs
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for Build to complete"
+      return hs
+    group: build.openshift.io
+    kind: Build
+  - check: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.phase ~= nil then
+          if obj.status.phase == "Pending" then
+            hs.status = "Healthy"
+            hs.message = obj.status.phase
+            return hs
+          end
+          if obj.status.phase == "Bound" then
+            hs.status = "Healthy"
+            hs.message = obj.status.phase
+            return hs
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for PVC"
+      return hs
+    kind: PersistentVolumeClaim
+  resourceIgnoreDifferences:
+    resourceIdentifiers:
+    - customization:
+        jsonPointers:
+        - /status/ingress
+        - /metadata/annotations
+      group: route.openshift.io
+      kind: Route
+    - customization:
+        jsonPointers:
+        - /status/ingress
+      group: quay.redhat.com
+      kind: QuayRegistry
+    - customization:
+        jsonPointers:
+        - /spec/managedClusterClientConfigs
+      group: cluster.open-cluster-management.io
+      kind: ManagedCluster
+  resourceTrackingMethod: annotation
+  server:
+    autoscale:
+      enabled: false
+    grpc:
+      ingress:
+        enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 125m
+        memory: 128Mi
+    route:
+      enabled: true
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
+    service:
+      type: ""
+  sso:
+    dex:
+      openShiftOAuth: true
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
+    provider: dex
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: gitops-operators
+  namespace: openshift-gitops-operator
+spec:
+  upgradeStrategy: Default
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-gitops-operator
+spec:
+  channel: gitops-1.14
+  config:
+    env:
+    - name: ARGOCD_CLUSTER_CONFIG_NAMESPACES
+      value: openshift-gitops, gitops
+    - name: CONTROLLER_CLUSTER_ROLE
+      value: gitops-controller
+    - name: SERVER_CLUSTER_ROLE
+      value: gitops-server
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
