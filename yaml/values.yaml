@@ -6,7 +6,7 @@ default:
         name: in-cluster
     # Annotations applied to all namespaces, merged with annotations defined on namespace
     annotations:
-      app.openshift.io/vcs-uri: https://bitbucket.msu.edu/ORG/openshift-helm
+      app.openshift.io/vcs-uri: https://bitbucket.example.edu/ORG/openshift-helm
       app.openshift.io/vcs-ref: main
     # Labels applied to all namespaces, merged with labels defined on namespace
     labels:
