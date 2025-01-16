@@ -11,4 +11,4 @@ You can confirm the firing of the alert by browsing to `Observe` > `Alerting` > 
 
 ![Screenshot](https://github.com/salanisor/public/blob/main/images/alerting.png)
 
-A good high-level work through example => (link)[https://developers.redhat.com/articles/2023/10/03/how-configure-openshift-application-monitoring-and-alerts#]
+A good high-level work through example => [link](https://developers.redhat.com/articles/2023/10/03/how-configure-openshift-application-monitoring-and-alerts#)
