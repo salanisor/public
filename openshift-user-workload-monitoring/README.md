@@ -1,4 +1,4 @@
-This folders provides the YAML files to deploy the user workload monitoring in the OpenShift observability strack.
+This folder provides the YAML files to deploy the user workload monitoring in the OpenShift observability strack.
 
 Alternatively, you can enable a dedicated Alertmanager for user workload alerting or tune the user workload monitoring stack. See `user-workload-monitoring-config.yaml` for details.
 
