@@ -19,3 +19,27 @@ patches:
     kind: ArgoCD
     name: openshift-gitops
     version: v1beta1
+
+- patch: |-
+    - op: add
+      path: "/spec/repo/env"
+      value:
+        - name: SSL_CERT_DIR
+          value: "/app/config/tls/"
+  target:
+    group: argoproj.io
+    kind: ArgoCD
+    name: openshift-gitops
+    version: v1beta1
+
+- patch: |-
+    - op: add
+      path: "/spec/server/env"
+      value:
+        - name: SSL_CERT_DIR
+          value: "/app/config/tls/"
+  target:
+    group: argoproj.io
+    kind: ArgoCD
+    name: openshift-gitops
+    version: v1beta1
