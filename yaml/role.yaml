@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: "2025-05-17T23:41:57Z"
+  name: pod-reader
+  namespace: gitops
+  resourceVersion: "85722"
+  uid: 49421840-634d-498c-b582-0a277bbe05a2
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
