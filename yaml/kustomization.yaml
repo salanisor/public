@@ -2,13 +2,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+- role.yaml
 # - namespace.yaml
 
-namespace: hashicorp-vault
-helmCharts:
-  - name: tenant
-    repo: oci://quay.apps.ocp4.example.com/helm
-    version: 0.1.2
-    releaseName: tenant
-    namespace: hashicorp-vault
-    valuesFile: values.yaml  	
+#namespace: hashicorp-vault
+#helmCharts:
+#  - name: tenant
+#    repo: oci://quay.apps.ocp4.example.com/helm
+#    version: 0.1.2
+#    releaseName: tenant
+#    namespace: hashicorp-vault
+#    valuesFile: values.yaml  	
