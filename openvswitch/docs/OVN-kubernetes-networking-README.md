@@ -305,7 +305,7 @@ Check logs:bash
 
 oc logs -n openshift-ovn-kubernetes -c ovn-controller ovnkube-node-<XXXXX> | grep acl
 
-Or inside the pod: /var/log/ovn/acl-audit-log.logCreated with assistance from Grok (xAI)
+Or inside the pod: /var/log/ovn/acl-audit-log.log
 For learning OpenShift networking. Feel free to extend or contribute improvements.
 
 ### How to Get It as a Download
@@ -486,7 +486,7 @@ Check logs inside ovnkube-node pod:bash
 
 oc logs -n openshift-ovn-kubernetes -c ovn-controller ovnkube-node-<XXXXX> | grep acl
 
-Created with Grok (xAI)
+
 Comprehensive guide for OpenShift networking debugging.
 Feel free to extend or contribute.
 
@@ -642,7 +642,7 @@ NBDB (ACLs): ovn-nbctl ...SBDB & OVS Flows: ovn-sbctl lflow-list, ovs-ofctl dump
 k8s.ovn.org/acl-logging: |
   {"deny": "alert", "allow": "notice"}
 
-Check logs in ovn-controller container.Created with Grok (xAI)
+Check logs in ovn-controller container.
 Comprehensive reference for OpenShift OVN-Kubernetes networking and debugging.
 Contributions and extensions welcome.
 
@@ -813,7 +813,7 @@ ACL Logging & ObservabilityAdd to namespace:yaml
 k8s.ovn.org/acl-logging: |
   {"deny": "alert", "allow": "notice"}
 
-Created with Grok (xAI)
+
 Comprehensive reference for OpenShift OVN-Kubernetes networking, OVS configuration, and debugging.
 
 ### How to Save as Downloadable README.md
@@ -965,7 +965,7 @@ ACL Logging & ObservabilityNamespace annotation:yaml
 k8s.ovn.org/acl-logging: |
   {"deny": "alert", "allow": "notice"}
 
-Created with Grok (xAI)
+
 Comprehensive reference for OpenShift OVN-Kubernetes networking and deep debugging.
 
 ### How to Save
@@ -1131,7 +1131,7 @@ Useful Commands ReferenceBridges & Tunnels: ovs-vsctl show, ovs-vsctl find inter
 k8s.ovn.org/acl-logging: |
   {"deny": "alert", "allow": "notice"}
 
-Created with Grok (xAI)
+
 Comprehensive reference for OpenShift OVN-Kubernetes networking and deep debugging.
 
 ### How to Save as Downloadable README.md
@@ -1304,7 +1304,7 @@ Useful Commands ReferenceBridges & Tunnels: ovs-vsctl show, ovs-vsctl find inter
 k8s.ovn.org/acl-logging: |
   {"deny": "alert", "allow": "notice"}
 
-Created with Grok (xAI)
+
 Comprehensive reference for OpenShift OVN-Kubernetes networking and deep debugging.
 
 ### How to Save
