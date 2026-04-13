@@ -1,0 +1,13 @@
+variant: fcos
+version: 1.7.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-rsa YOUR_PUBLIC_SSH_KEY_HERE   # Paste your ~/.ssh/id_rsa.pub or id_ed25519.pub
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: my-fcos-vm

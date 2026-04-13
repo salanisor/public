@@ -1,0 +1,13 @@
+variant: fcos
+version: 1.7.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGswqt/S5CRYcEJeHD2kKDcLcl1RXMbcQrpIBkUkedTH 71178706+salanisor@users.noreply.github.com
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: my-fcos-vm
